@@ -1,0 +1,3 @@
+[submodule "tex/code"]
+	path = tex/code
+	url = https://github.com/Lehks/Angwandte_Informatik_Code
