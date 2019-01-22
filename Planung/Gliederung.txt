@@ -1,0 +1,20 @@
+1. Einführung                               1/4
+2. Was sind/machen Grafik APIs?
+    1. Überblick                            1/2
+    2. Hardware                             1/4
+    3. Statistiken (Marktanteil etc.)       1/4
+3. Shader-Pipeline
+    1. Was sind Shader?                     1/4
+    2. Vertex-Shader                        1/2
+    3. Tesselation-Shader                   1/4
+    4. Geometry-Shader                 ?    1/4
+    5. Rasterisation                        1/2
+    6. Fragment(/Pixel)-Shader              1/2
+    7. Blending                             1/2
+4. Buffer
+    1. Vertex Buffer                        1/2
+    2. Index Buffer                         1/2
+    3 Andere Buffer                    ?    1/4
+5. Uniforms                                 1/2
+
+                                            5 3/4 Seiten
