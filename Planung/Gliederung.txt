@@ -14,7 +14,7 @@
 4. Buffer
     1. Vertex Buffer                        1/2
     2. Index Buffer                         1/2
-    3 Andere Buffer                    ?    1/4
+    3. Andere Buffer                   ?    1/4
 5. Uniforms                                 1/2
 
                                             5 3/4 Seiten

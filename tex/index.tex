@@ -4,14 +4,10 @@
 \usepackage[german]{babel}
 \usepackage{hyperref}
 \usepackage{listings}
-\usepackage{color}
-%\usepackage[style=numberic-comp,subentry]{biblatex}
 \usepackage{apacite}
 \usepackage{verbatim}
 \usepackage{tcolorbox}
 \usepackage{tikz}
-
-\definecolor{code_bg}{rgb}{0.7,0.7,0.7}
 
 % Source of command (last viewed 22.01.2019): https://tex.stackexchange.com/a/294990
 \newcommand{\linksymbol}
@@ -45,16 +41,61 @@
 
 \newcommand{\includeglslcode}[3]
 {
-    \begin{tcolorbox}[title=GLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1},top=0pt,bottom=0pt]
+    \begin{tcolorbox}[title=GLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1\linksymbol},top=0pt,bottom=0pt]
         \lstinputlisting[style=glsl_style, firstline=#2, firstnumber=#2, lastline=#3]{code/#1}
     \end{tcolorbox}
 }
 
 \newcommand{\includehlslcode}[3]
 {
-    \begin{tcolorbox}[title=HLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1},top=0pt,bottom=0pt]
+    \begin{tcolorbox}[title=HLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1\linksymbol},top=0pt,bottom=0pt]
         \lstinputlisting[style=hlsl_style, firstline=#2, firstnumber=#2, lastline=#3]{code/#1}
     \end{tcolorbox}
+}
+
+\newcommand{\includeglslhlslcode}[6]
+{
+    \begin{tcolorbox}[title=GLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1\linksymbol},top=0pt,bottom=0pt]
+        \lstinputlisting[style=glsl_style, firstline=#2, firstnumber=#2, lastline=#3]{code/#1}
+        \tcbsubtitle{HLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#4\#L#5}{#4\linksymbol}}
+        \lstinputlisting[style=hlsl_style, firstline=#5, firstnumber=#5, lastline=#6]{code/#4}
+    \end{tcolorbox}
+}
+
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+
+\newcommand{\drawrasterizergfxnotfilled}
+{
+    \begin{center}
+        \begin{tikzpicture}
+            \draw (0.25,1.25) -- (3.25,3.75) -- (3.75,0.25) -- cycle;
+            \fill (0.25,1.25) circle (1pt);
+            \fill (3.25,3.75) circle (1pt);
+            \fill (3.75,0.25) circle (1pt);
+            \draw[step=0.5,black,thin] (0.0,0.0) grid (4.0,4.0);
+        \end{tikzpicture}
+    \end{center}
+}
+
+\newcommand{\drawrasterizergfxfilled}
+{
+    \begin{center}
+        \begin{tikzpicture}
+            \fill[fill=grey] (3.0,4.0) rectangle (3.5, 3.5);
+            \fill[fill=grey] (2.5,3.5) rectangle (3.5, 3.0);
+            \fill[fill=grey] (1.5,3.0) rectangle (3.5, 2.5);
+            \fill[fill=grey] (1.0,2.5) rectangle (3.5, 2.0);
+            \fill[fill=grey] (0.5,2.0) rectangle (4.0, 1.5);
+            \fill[fill=grey] (0.0,1.5) rectangle (4.0, 1.0);
+            \fill[fill=grey] (1.0,1.0) rectangle (4.0, 0.5);
+            \fill[fill=grey] (3.0,0.5) rectangle (4.0, 0.0);
+            \draw (0.25,1.25) -- (3.25,3.75) -- (3.75,0.25) -- cycle;
+            \fill (0.25,1.25) circle (1pt);
+            \fill (3.25,3.75) circle (1pt);
+            \fill (3.75,0.25) circle (1pt);
+            \draw[step=0.5,black,thin] (0.0,0.0) grid (4.0,4.0);
+        \end{tikzpicture}
+    \end{center}
 }
 
 \lstdefinestyle{base_style}
@@ -65,7 +106,8 @@
     numbersep=5pt,
     %captionpos=b,
     %framexleftmargin=1.5em,
-    xleftmargin=1em
+    xleftmargin=1em,
+    basicstyle=\footnotesize
 }
 
 \lstdefinestyle{c_style}

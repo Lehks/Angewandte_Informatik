@@ -1,2 +1,58 @@
 
 \section{Shader Pipeline}
+
+Die Shader Pipeline ist eine Reihe von Aufgaben, die pro berechnetem Bild ausgeführt werden. 
+
+Wie der Name bereits sagt, besteht die Shader Pipeline aus einzelnen Shadern, um zu verstehen wie die Pipeline funktioniert muss also zuerst bekannt sein was ein Shader ist.
+
+\subsection{Shader}
+Ein Shader ist ein einzelnes Programm dass auf der GPU ausgeführt werden kann. Sie haben, ähnlich wie Programme die zum Beispiel in C oder Java geschrieben sind, eine \texttt{main}-Funktion die alle Befehle enthält, die ausgeführt werden sollen.
+
+Shader werden in eigenen Sprachen geschrieben, die von Grafik API zu Grafik API unterschiedlich sind. OpenGL und Vulkan nutzen GLSL\footnote{Eigentlich nutzt Vulkan kein GLSL sondern ein Bytecode Format namens SPIR-V. Da dieser Bytecode allerdings nicht von Menschen geschrieben werden kann, ist im Vulkan SDK ein Cross-Compiler von GLSL zu SPIR-V enthalten, der es ermöglicht Shader für Vulkan in GLSL zu implementieren} (OpenGL Shading Language) und Direct3D nutzt HLSL (High Level Shading Language).
+
+GLSL und HLSL sind beide an C angelehnte Sprachen (bzw. C++ im Fall von HLSL, da die Sprache Objektorientiert ist), sie haben allerdings zusätzliche Features die für die Grafik Berechnung benötigt werden. Zudem haben beide sehr gute, eingebaute Mathematik Bibliotheken.
+
+\includeglslhlslcode{example-2/shader.glsl}{7}{10}{example-2/shader.hlsl}{7}{7}
+
+\subsection{Verticies}
+Ein Vertex (plural Verticies) ist ein Punkt im dreidimensionalen Raum mit dem nutzerdefiniert Daten assoziiert werden. Üblicherweise ist mit einem Vertex mindestens eine 3D Koordinate assoziiert, in der Regel aber noch viel mehr (z.B. eine sog. UV-Koordinate, die zum Texture-Mapping verwendet wird). Verticies werden genutzt um grundlegende Flächen (sog. Primitives) zu bilden. So bilden z.B. drei Verticies ein Dreieck dessen Fläche beispielsweise mit einer Farbe oder Texture gefüllt werden kann. Mit Hilfe dieser Primitives lassen sich dann komplexere Formen bilden. So führen zwei Dreiecke zu einem Viereck und mit sechs Vierecken ist es möglich einen Würfel zu bauen\footnote{Es wäre auch möglich direkt ein Viereck aus vier Verticies zu bilden, es ist allerdings üblich ausschließlich Dreiecke zu nutzen und daraus dann komplexere Strukturen zu bauen}.
+
+Verticies werden auf CPU-Seite definiert und dann von der Grafik API an die Grafikkarte weiter gegeben.
+
+\subsection{Shader Stages}
+Die Shader Pipeline besteht aus mehreren, so genannten Shader Stages. Für jede Shader Stage gibt es immer genau einen Shader, der allerdings in der Regel pro Shader Stage mehrmals ausgeführt.
+
+Zudem gibt es fest definierte Shader Stages, die nicht von einem Nutzer durch einen Shader angepasst werden können.
+
+\subsubsection{Vertex Specification}
+Die Vertex Specification Stage ist eine fest definierte Stage. Sie verarbeitet die Vertex Daten, die von der CPU an die GPU gegeben werden und bereitet sie darauf vor von dem Rest der Pipeline genutzt zu werden.
+
+\subsubsection{Vertex Shader}
+\paragraph{Funktionalität}
+Die Vertex Shader Stage ist der erste, von einem Nutzer anpassbare Shader Stage. Der Shader wird für jeden einzelnen Vertex ausgeführt und es ist möglich die Daten von den jeweiligen Verticies zu verändern.
+
+\paragraph{Sinn}
+Die Daten von Verticies zu verändern scheint sinnlos zu sein, allerdings wären die Möglichkeiten ohne den Vertex Shader stark eingeschränkt. Zum Beispiel, wenn eine Kamera durch eine virtuelle Welt bewegt werden soll ist dies nur durch die Vertex Shader Stage möglich, denn die Kamera ist in Grafik APIs generell statisch, sie kann also nicht bewegt werden. Um dennoch eine sich bewegende Kamera simulieren zu können bewegt man die gesamte Welt um die Kamera herum anstatt die Kamera selbst. Diese transformationen werden im Vertex Shader vorgenommen.
+
+\subsubsection{Rasterisation}
+\paragraph{Funtkionalität}
+Die Rasterisation Stage ist eine fest definierte Shader Stage. Sie berechnet welche Primitives welche Pixel auf dem Ausgabemedium (z.B. Bildschirm oder Bilddatei) einnehmen.
+
+\paragraph{Beispiel}
+Das folgende Dreieck soll gezeichnet werden (das Gitter sind die einzelnen Pixel des Ausgabemediums):
+
+\drawrasterizergfxnotfilled
+
+Da jeder Pixel nur genau eine Farbe haben kann, muss die Grafik API bestimmen, welche Pixel zu dem Dreieck gehören und welche nicht. Theoretisch könnte das Ergebnis wie folgt aussehen (gefüllte Rechtecke sind Teil des Dreiecks, nicht gefüllte Rechtecke sind es nicht)\footnote{Die Abbildung ist lediglich zu Visualisierungszwecken und stellt nicht unbedingt das Ergebnis einer Grafik API dar}:
+
+\drawrasterizergfxfilled
+
+\subsubsection{Fragment / Pixel Shader}
+\paragraph{Funktionalität}
+Die Fragment Shader Stage bestimmt die Farbe eines Pixels (beziehungsweise eines Fragments, siehe weiter unten). Diese Shader Stage ist optional.
+
+\paragraph{Sinn}
+Dadurch, dass mit Hilfe der Fragment Shader Stage die Farbe von einzelnen Pixeln bestimmt werden kann, ermöglicht er unter anderem per Pixel Beleuchtung\footnote{Es existiert ebenfalls per Vertex Beleuchtung, dies sieht allerdings sehr unrealistisch aus und wird in der Regel nur aus Performance Gründen genutzt} und Texture Mapping.
+
+\paragraph{Unterschied zwischen Fragments und Pixeln}
+Ein Fragment ist ein potentieller Pixel. Während ein Pixel ein tatsächlicher Bildpunkt ist der genau eine Farbe ohne Transparent hat, kann es pro Pixel mehrere Fragmente mit verschiedenen Farben und Transparenz (aber immer nur eine Farbe pro Fragment) geben. Diese einzelnen Fragmente werden dann später zusammen verrechnet um die endgültige Farbe des Pixels zu bestimmen. Wenn zum Beispiel eine grüne Wand hinter einer rot eingefärbten Glasscheibe steht, dann würde die Fragment Shader Stage ein Fragment mit der Farbe grün und ohne Transparenz ausgeben und ein Fragment mit der Farbe rot und $50\%$ Transparenz. Wenn diese beiden Fragmente zusammen gerechnet werden, dann hätte der finale Pixel die Farbe gelb (und keine Transparenz). Es ist allerdings auch möglich dass ein Fragment direkt zu einem Pixel wird, zum Beispiel, wenn im vorherigen Beispiel die rote Glasscheibe fehlen würde.
