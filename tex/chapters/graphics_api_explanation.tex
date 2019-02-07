@@ -2,30 +2,58 @@
 \section{Grafik APIs}
 
 \subsection{Was sind Grafik APIs?}
-Eine Grafik API ist eine einheitliche Schnittstelle zur Programmierung einer Grafikkarte (GPU\footnote{Streng genommen sind eine Grafikkarte und eine GPU nicht dass selbe, viel mehr ist die GPU ein Teil einer Grafikkarte. Im Rahmen dieses Berichtes werden die beiden Begriffe jedoch als Synonyme genutzt.}). Dies ist notwendig, da verschiedene GPUs unterschiedlich Angesprochen werden und ohne eine solche Grafik API ein Programm für verschiedene GPUs unterschiedlich implementiert werden müsste \cite{samsung_what_is_a_graphics_api}. Visualisiert würde ein Programm also so aussehen:
+Eine Grafik API ist eine einheitliche Schnittstelle zur Programmierung einer Grafikkarte (GPU\footnote{Streng genommen sind eine Grafikkarte und eine GPU nicht dasselbe, viel mehr ist die GPU ein Teil einer Grafikkarte. Im Rahmen dieses Berichtes werden die beiden Begriffe jedoch als Synonyme genutzt.}). Dies ist notwendig, da verschiedene GPUs unterschiedlich programmiert werden müssen, und ohne eine solche Grafik API ein Programm für verschiedene GPUs jeweils pro GPU erneut implementiert werden müsste \cite{samsung_what_is_a_graphics_api}. Folglich sind Anwendungen, die Grafik nutzen, in Schichten aufgebaut. Abbildung \ref{fig:applicationlayers} visualisiert diese.
 
-\begin{tcolorbox}
+\begin{figure}
+    \caption{Die Schichten in einer Grafik Anwendung.}
+    \label{fig:applicationlayers}
     \begin{tcolorbox}
-        \begin{center}
-            High-Level Anwendung
-        \end{center}
+        \begin{tcolorbox}
+            \begin{center}
+                High-Level Anwendung
+            \end{center}
+        \end{tcolorbox}
+        \begin{tcolorbox}
+            \begin{center}
+                Grafik API
+            \end{center}
+        \end{tcolorbox}
+        \begin{tcolorbox}
+            \begin{center}
+                GPU Treiber
+            \end{center}
+        \end{tcolorbox}
     \end{tcolorbox}
-    \begin{tcolorbox}
-        \begin{center}
-            Grafik API
-        \end{center}
-    \end{tcolorbox}
-    \begin{tcolorbox}
-        \begin{center}
-            GPU Treiber
-        \end{center}
-    \end{tcolorbox}
-\end{tcolorbox}
+\end{figure}
 
-Wie zu sehen ist, ist auf der obersten Schickt die Anwendung, die etwas grafisch Darstellen möchte. Diese gibt die jeweiligen Befehle dann weiter an die Grafik API, die die Befehle dann wiederrum an den jeweiligen GPU Treiber weiter gibt. Dabei ist zu beachten, dass die Anwendungs-Schickt in der Regel wieder in weitere, kleinere Schiten unterteilt werden kann - üblicherweise wird der Zugriff auf Grafik APIs durch Frameworks abstrahiert.
+Wie zu sehen ist, ist auf der obersten Schicht die Anwendung, die etwas grafisch darstellen möchte. Diese gibt die jeweiligen Befehle weiter an die Grafik API, die die, an die jeweiligen GPU angepassten, Befehle dann wiederrum an den Treiber weiterleitet. Dabei ist zu beachten, dass die Anwendungs-Schicht in der Regel wieder in weitere, kleinere Schichten unterteilt werden kann - üblicherweise wird der Zugriff auf Grafik APIs z.B. durch Frameworks abstrahiert.
 
 \subsection{Unterschiedliche APIs}
-Auf dem Markt gibt es diverse Grafik APIs. Die in diesem Bericht behandelten APIs sind OpenGL (\url{https://www.opengl.org/}), Vukan (\url{https://www.khronos.org/vulkan/}) und Direct3D\footnote{Der Name DirectX wird oftmals an Stelle von Direct3D verwendet. Allerdings ist DirectX eine Sammlung von verschiedenen Bibliotheken (unter anderem Direct3D). Direct3D ist also die GrafikAPI, die in DirectX enthalten ist.} (\url{https://docs.microsoft.com/en-us/windows/desktop/direct3d}).
+Auf dem Markt gibt es diverse Grafik APIs. Zu den Bekanntesten gehören wohl OpenGL (\url{https://www.opengl.org/}) und Direct3D\footnote{Der Name DirectX wird oftmals an Stelle von Direct3D verwendet. Allerdings ist DirectX eine Sammlung von verschiedenen Bibliotheken. Direct3D ist die Grafik API, die in DirectX enthalten ist. Andere, in DirectX enthaltene Bibliotheken, sind beispielsweise DirectXMath oder XAudio2.} (\url{https://docs.microsoft.com/en-us/windows/desktop/direct3d/}). Allerdings gibt es noch deutlich mehr APIs, z.B. Vulkan (\url{https://www.khronos.org/vulkan/}), das von demselben Konsortium, das auch bereits OpenGL veröffentlicht hat, der Khronos Group, veröffentlicht wird. Zudem existiert Metal (\url{https://developer.apple.com/metal/}), eine Grafik API von Apple für die hauseigenen Geräte.
+
+All diese APIs haben ihre Daseinsberechtigung, denn es gibt teils große Unterschiede. Auf der einen Seite gibt es high- und low-level APIs. Low-level APIs erlauben deutlich mehr Anpassung und Feinabstimmung, um das Maximum an Rechenleistung zu bekommen (Direct3D 12: \cite{d3d12_what_is_d3d12}; Vulkan: \cite{vk_getting_started_win}). High-level APIs hingegen nehmen einem Programmierer einen großen Teil der Arbeit ab, die bei einer low-level API manuell gemacht werden müsste. Zudem sind nicht alle Grafik APIs auf allen Betriebsystemen lauffähig. Tabelle \ref{tab:apis} gibt Aufschluss über die verschiedenen APIs. Bei der Unterscheidung zwischen low- und high-level APIs ist zudem zu beachten, dass, verglichen mit anderen Grafik Frameworks, die auf den Grafik APIs aufbauen, alle Grafik APIs auf einem niedrigen Level operieren. Die Begriffe low- und high-level werden lediglich verwendet um die APIs selbst in Relation miteinander zu setzen.
+
+\begin{table}[tb]
+	\centering
+    \caption{Die ein Überblick über die Unterschiedlichen Grafik APIs.}
+    \label{tab:apis}
+    \begin{tabular}{lll}
+        \toprule
+        \emph{Grafik API} & \emph{low-/high-level} & \emph{Zielplattform(en)} \\ 
+        \midrule
+        OpenGL      & high-level & Alle\cite{opengl_wiki_faq} \\
+        Direct3D 11 & high-level & Microsoft Windows 7 oder neuer\cite{d3d_manual_startpage} \\
+        Direct3D 12 & low-level  & nur Microsoft Windows 10\cite{d3d12_what_is_d3d12} \\
+        Vulkan      & low-level  & Alle\footnotemark\cite{vk_getting_started_win}\cite{vk_getting_started_linux}\cite{vk_getting_started_mac} \\
+        Metal       & low-level  & OSX / IOS\cite{metal_front_page} \\ 
+        \bottomrule
+	\end{tabular}
+\end{table}
+
+\footnotetext{Streng genommen ist Vulkan nicht auf IOS/MacOS lauffähig. Es gibt allerdings das Tool MoltenVK, das dies dennoch ermöglicht.\cite{vk_getting_started_mac}}
+
+Dieser Bericht konzentriert sich hauptsächlich auf OpenGL und Direct3D (Version 11). Alle vorgestellten Konzepte wurden nur für diese recherchiert, sie sollten aber auch für die restlichen, oben aufgezählten, APIs gelten (schließlich laufen die Programme, unabhängig von der Grafik API, auf der gleichen Hardware). Zudem wird, um Einheitlichkeit zu gewähren und Verwirrung zu verhindern, in diesem Bericht ausschließlich das OpenGL Vokabular für Fachbegriffe verwendet, die Tabelle \ref{tab:dictionary} ist jedoch eine Art Wörterbuch, dass dabei hilft, vom OpenGL Vokabular zum Direct3D Vokabular zu übersetzen.
 
 \subsection{Hardware}
-Um zu verstehen warum Grafik APIs funktionieren wie sie funktionieren ist es notwendig zu verstehen wie die Hardware auf der sie laufen, die GPUs, funktionieren. Dabei ist eine GPU nicht allzu unterschiedlich von einer CPU, beide sind Recheneinheiten. Außerdem hat auch jede GPU einen Arbeitsspeicher (genannt Video-RAM oder auch VRAM). Der große Unterschied zwischen einer GPU und einer CPU besteht allerdings daraus, dass CPUs vergleichsweise hohe Taktraten und wenige Rechenkerne haben. GPUs hingegen haben deutlich geringere Taktraten, aber dafür deutlich mehr Kerne. Zum Vergleich: Ein moderner (Stand Anfang 2019) Intel I7 Prozessor hat acht Rechenkerne und eine Taktrate von 3,60 GHz \cite{intel_i7_9700k_processor}. Eine ebenfalls moderne Nvidia GTX 1080 Grafikkarte hat hingegen 2560 Rechenkerne und eine Taktrate von 1,607 GHz \cite{nvidia_gtx_1080_gpu}. Letztendlich können CPUs also nur wenige Dinge gleichzeitig berechnen, diese aber dafür sehr schnell. GPUs können sehr viele Dinge gleichzeitig berechnen, benötigen für die einzelnen Aufgaben jedoch länger.
+\label{sec:graphicsapis:hardware}
+Um zu verstehen warum Grafik APIs funktionieren, wie sie funktionieren, ist es notwendig zu verstehen wie die Hardware auf der sie laufen, die GPUs, funktionieren. Dabei ist eine GPU nicht allzu unterschiedlich von einer CPU, beide sind Recheneinheiten. Außerdem gehört auch zu jeder GPU, analog zu einer CPU, einen Arbeitsspeicher (genannt Video-RAM oder auch VRAM). Der große Unterschied zwischen einer GPU und einer CPU besteht allerdings darin, dass CPUs vergleichsweise hohe Taktraten und wenige Rechenkerne haben. GPUs hingegen haben deutlich geringere Taktraten, aber dafür deutlich mehr Kerne. Zum Vergleich: Ein moderner (Stand Anfang 2019) Intel I7 Prozessor hat acht Rechenkerne und eine Taktrate von 3,60 GHz \cite{intel_i7_9700k_processor}. Eine, zum gleichen Zeitpunkt ebenfalls moderne, Nvidia GTX 1080 Grafikkarte hat hingegen 2560 Rechenkerne und eine Taktrate von 1,607 GHz \cite{nvidia_gtx_1080_gpu}. Letztendlich können CPUs also nur wenige Dinge gleichzeitig berechnen, diese aber dafür sehr schnell. GPUs können sehr viele Dinge gleichzeitig berechnen, benötigen für die einzelnen Aufgaben jedoch länger.

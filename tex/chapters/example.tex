@@ -1,0 +1,165 @@
+\section{Beispiel}
+\subsection{Vorwort zum Beispiel}
+
+In diesem Kapitel wird ein Beispiel gezeigt, wie mit Hilfe von OpenGL ein Viereck gezeichnet werden kann. Dabei werden Vertex und Fragment Shader verwendet, sowie Vertex, Index und Uniform Buffer.
+
+\subsubsection{Code und GitHub}
+Der gesamte, vollständig dokumentierte Code des Beispiels kann auf GitHub eingesehen werden. Der Link zu dem Repository ist \url{https://github.com/Lehks/Angewandte_Informatik_Code}. Die Datei \texttt{\href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/README.md}{README.md}} enthält weitere Informationen über den Inhalt und die Nutzung dieses Repositories.
+
+Codebeispiele werden immer in dem folgenden Format angegeben:
+\includeccode{src/example.c}{11}{15}
+Es ist zu Beachten, dass immer nur ein Teil des Quelltextes in einer Datei angegeben wird. Damit der Ausschnitt in der originalen Datei gefunden werden kann, wird aus diesem Grund zusätzlich immer der Dateiname angegeben\footnote{Dieser ist relativ zu dem Wurzelverzeichnis des oben genannten GitHub-Repositories.}. Zudem stehen links neben dem Code immer die Zeilennummern, die der Ausschnitt auch in der Datei selbst hat.
+
+Außerdem wurden einige Befehle, die zwar nötig sind, aber für das Beispiel keine besondere Relevanz haben, in Funktionen in der Datei \texttt{\href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/src/util.c}{src/util.c}} ausgelagert. Diese Funktionen werden lediglich so zu dem Maße erklärt, dass verständlich ist was sie im jeweiligen Kontext machen, in dem sie aufgerufen werden. Allerdings wird nicht erklärt wie sie implementiert, sind (die Funktionen sind dennoch im Quellcode dokumentiert, dort kann ihre Funktionsweise nachgelesen werden). Im Folgenden werden solche Funktion util-Funktionen genannt.
+
+\subsubsection{OpenGL als Zustandsautomat}
+Zudem wird zum konkreten Arbeiten mit OpenGL noch ein wenig mehr Vorwissen benötigt. Denn OpenGL ist ein Zustandsautomat - jegliche Funktion lesen oder verändern diesen Zustand\cite{gl_state_machine}. 
+
+Dies wird vor allem bei einem bestimmten Pattern offensichtlich, dass sich um das binden und un-binden (vom englischen \textit{to bind}) von Objekten dreht.
+
+Dieses Pattern sieht aus wie folgt:
+\begin{enumerate}
+    \item Es wird ein Objekt kreiert (z.B. ein Vertex Buffer). Nach der Kreierung erhält der Programmierer die ID des Objektes.
+    \item Das Objekt wird gebinded. Für OpenGL ist dieses Objekt jetzt aktiv.
+    \item Es werden Operationen, die das Objekt verändern sollen ausgeführt. Diese Operationen beziehen sich auf der Objekt, dass derzeit gebinded ist. Es wird nicht etwa die ID des Objektes übergeben.
+\end{enumerate}
+
+Wenn mehrere Objekte verwaltet werden müssen, dann müsste erst ein Objekt gebinded und verändert werden. Danach müsste das nächste Objekt gebinded werden und es wäre dann möglich dieses Objekt zu verändern.
+
+Dieses Pattern wird in diesem Beispiel für Vertex und Index Buffern, sowie Shader (beziehungsweise programs, siehe Paragraph \ref{sec:example:theexample:initphase:program}) genutzt.
+
+\subsubsection{Clean-Code}
+Der Code in diesem Beispiel sollte nicht zwingend als Vorlage für OpenGL Projekte dienen. Dies hat den Grund dass er möglichst kurz gehalten ist und aus diesem Grund auf Error-Handling verzichtet wurde. In einem größeren Projekt müsste nach jedem aufruf eine OpenGL Funktion geprüft werden ob ein Fehler aufgetreten ist. 
+
+\subsection{Das Beispiel}
+Das Ziel des Beispiels ist es, ein Viereck mit den Koordinaten (NDC)
+$$
+    \left\{
+    \begin{tabular}{ccc}
+        \{-0.75, -0.75\}, & \{0.75, 0.75\}, & \{-0.75, 0.75\}, \\ 
+                          & \{0.75, -0.75\} &
+    \end{tabular}    
+    \right\}
+$$
+zu zeichen. Zudem soll die Fläche des Dreieckes mit der Farbe Rot (ohne Transparenz) gefüllt werden. Das Viereck soll aus zwei Dreiecken bestehen.
+
+Um dies zu Bewerkstelligen soll ein Vertex Buffer verwendet werden, um die vier unterschiedlichen Verticies, die für ein Viereck nötig sind, zu speichern. Außerdem soll ein Index Buffer verwendet werden um aus diesen vier Verticies letztendlich zwei Dreiecke zu zeichen. Zuletzt soll die Farbe durch einen Uniform Buffer an die Rendering Pipeline gegeben werden.
+
+Die Daten für die einzelnen Buffer sind in diesen Arrays gespeichert:
+\includeccode{src/main.c}{11}{32}
+Die Positionsdaten werden in der bereits bekannten NDC Form angegeben, die Farbe im Array \texttt{fragment\_color} wird von OpenGL allerdings auch in einem festen Format erwartet. Dieses Format ist RGBA (RGB und ein Kanal für die Transparenz) und der Wertebereich ist für jeden Kanal $[0;1]$.
+
+Zudem existieren für die Arrays einige Konstanten:
+\includeccode{src/main.c}{34}{54}
+
+Das Programm selbst kann in drei Phasen unterteilt werden: die Initialisierungsphase, die Hauptphase und die Terminierungsphase.
+
+Die gesamte \texttt{main}-Funktion des Beispiels sieht aus wie folgt:
+\includeccode{src/main.c}{491}{508}
+
+\subsubsection{Initialisierungsphase}
+Die Initialisierungsphase sorgt dafür, dass die Daten, die zum Zeichnen von OpenGL benötigt werden bereitgestellt wurden. Sie ist also dafür verantwortlich, dass die Buffer kreiert und befüllt wurden und das die Shader geladen wurden. Die Funktion \texttt{initialize()} übernimmt die gesamte Initialisierung:
+\includeccode{src/main.c}{410}{438}
+
+In diesem Stück Code finden exakt die oben genannte Aktionen statt:
+\begin{enumerate}
+    \item Zeilen 405 und 406: Util-Funktionen um das Fenster zu öffnen und OpenGL zu initialisieren.
+    \item Zeilen 409 und 411: Den Vertex Buffer (und Vertex Array, siehe Paragraph \ref{sec:example:theexample:initphase:vao}) anlegen und binden.
+    \item Zeilen 415 bis 418: Den Index Buffer anlegen und binden.
+    \item Zeilen 423 und 425: Das \textit{program} (siehe Paragraph \ref{sec:example:theexample:initphase:program}) anlegen und binden.
+    \item Zeile 429: Die Daten des Uniform Buffers, der die Farbe beinhaltet, setzen.   
+\end{enumerate}
+
+\paragraph{Vertex Buffer anlegen}
+\label{sec:example:theexample:initphase:createbuffer}
+Der Code, mit dem der Vertex Buffer angelegt wird, ist der Folgende:
+\includeccode{src/main.c}{140}{167}
+Zuerst wird ein Vertex Array angelegt und gebinded (siehe Paragraph \ref{sec:example:theexample:initphase:vao}). Danach wird der eigentliche Vertex Buffer angelegt und gebinded (Zeilen 146 bis 148). Die Funktion \texttt{glGenBuffers()} generiert dabei einen generischen Buffer und nicht zwingend einen Vertex Buffer. Es wird erst festgelegt, dass der Buffer als Vertex Buffer verwendet werden soll, wenn er als solcher mit \texttt{getBindBuffer()} gebinded wird.
+
+Nachdem der Buffer gebinded ist, kann er mit Daten befüllt werden (Zeilen 150 bis 153). Die wichtigsten Parameter sind der Zweite und Dritte, denn hier werden jeweils die Größe des Arrays und das Array selbst an OpenGL übergeben.
+
+Zuletzt muss nurnoch das Layout der Daten bestimmt werden (bisher sind nur nur Daten selbst gesetzt, aber nicht wie diese zu Interpretieren sind). Dies geschieht in den Zeilen 155 - 161. 
+Das Konzept des Speicher Layouts besteht aus sogenannten Vertex Attributen. Ein Vertex Attribut ist beispielsweise die Position oder UV-Koordinaten (genutzt beim Texture Mapping). In diesem Beispiel wird jedoch nur ein einziges Attribut verwendet, da nur die Positionsdaten gespeichert werden. Attribute sind an Indices gebunden. Über diesen Index kann dann in einem Shader auf das jeweilige Attribut zugegriffen werden. Zuerst muss OpenGL mitgeteilt werden, dass ein Index genutzt werden soll. Dies geschieht mit \texttt{glEnableVertexAttribArray()}, in diesem Fall wird damit das Attribut am Index $0$ aktiviert. Danach wird mit \texttt{glVertexAttribPointer()} das Layout eines Attributes bestimmt. Die wichtigen Parameter sind dabei die Parameter eins, zwei, drei und fünf. Ihre Bedeutung ist wie folgt:
+
+\begin{enumerate}
+    \item [1.] Der Index des Attributs.
+    \item [2.] Die Anzahl der Elemente im Attribut (in diesem Fall zwei, da pro Position zwei Werte gespeichert werden).
+    \item [3.] Der Datentyp der Element im Attribut. Hier kann aus einer, von OpenGL definierten Listen ausgewählt werden - GL\_FLOAT ist das direkte gegenstück zu dem Datentyp \texttt{float} aus C.
+    \item [5.] Die größe des Attributes im Speicher selbst (angegeben in Bytes).
+\end{enumerate}
+
+\paragraph{Exkurs Vertex Array}
+\label{sec:example:theexample:initphase:vao}
+Vertex Arrays sind OpenGL spezifisch. Sie erleichtern den Umgang mit OpenGL als Zustandsautomat.
+
+Problemstellung: Da Vertex Buffer und ihr jeweiliges Layout bei mehreren Buffern (und dadurch mehreren Layouts, da jeder Buffer wohl sein eigenes Layout hat) immer gebinded werden müssen, entsteht sehr viele Code.
+
+Lösung durch Vertex Arrays: Vertex Arrays stellen eine Verbindung zwischen einem Buffer und ihrem Layout her, wenn ein Vertex Array gebinded wird, wird automatisch der jeweilige Buffer und sein Layout gebinded.
+
+\paragraph{Index Buffer anlegen}
+Nachdem der Vertex Buffer angelegt wurde, kann der Index Buffer angelegt werden. Dies geschieht analog zum Vertex Buffer:
+\includeccode{src/main.c}{216}{231}
+Es werden die gleichen Funktionen genutzt, der Hauptunterschied liegt lediglich im ersten Argument von \texttt{glBindBuffer()} und \texttt{glBufferData()}, da hier spezifiziert wird, dass ein Index Buffer genutzt werden soll.
+
+\paragraph{Shader laden}
+\label{sec:example:theexample:initphase:program}
+Um Shader zu nutzen, braucht ein Programmierer ein sogenanntes \textit{program} Objekt. Dieses \textit{program} stellt die gesamte Rendering Pipeline dar, sie vereint also alle Shader.
+
+Der Ablauf zum Erstellen eines \textit{programs} ist:
+\begin{enumerate}
+    \item Ein \textit{program} Objekt anlegen.
+    \item Die gewünschten Shader (in diesem Fall nur Vertex und Fragment Shader) einzeln vom Source Code kompilieren.
+    \item Die Shader in das \textit{program} linken. Die Shader sind nun ein fester Bestandteil des programs.
+\end{enumerate} 
+
+Der konkrete Code um das \textit{program} anzulegen ist (die Funktion \texttt{sai\_compile\_shader()} kompiliert einzelne Shader, sie wird an dieser Stelle aber nicht weiter beschrieben.):
+\includeccode{src/main.c}{306}{347}
+
+Dieser Code führt die folgenden Befehle aus:
+\begin{enumerate}
+    \item Zeile 308: Das \textit{program} Objekt erstellen.
+    \item Zeilen 310 bis 317: Den Quellcode des Vertex Shaders aus einer Datei laden und kompilieren.
+    \item Zeilen 310 bis 317: Den Quellcode des Fragment Shaders aus einer Datei laden und kompilieren.
+    \item Zeilen 335 bis 338: Die Shader dem \textit{program} hinzufügen und das \textit{program} linken.
+    \item Zeilen 340 bis 344: Aufräumarbeiten, die separaten Shader Objekte werden nicht mehr gebraucht da sie nun ein fester Teil des \textit{programs} sind. 
+\end{enumerate}
+
+Zu diesem Zeitpunkt ist ebenfalls der Shader Code sehr interessant:
+\includeglslcode{shader/example-shader.vs.glsl}{8}{13} 
+Hier (im Vertex Shader) zeigt sich wie auf die Daten aus dem Vertex Buffer zugegriffen werden kann. Für jedes Vertex Attribut existiert eine Variable wie \texttt{color}. Um diese Variable zu definieren, werden neben dem Namen drei weitere Dinge angegeben:
+\begin{enumerate}
+    \item Der Datentyp: In diesem Fall wurde der Typ \texttt{vec4} (ein Vektor mit vier Gleitkomma Komponenten) gewählt, da Positionen in diesem Format angegeben werden.
+    \item Der Index des Vertex Attributs: Dies ist der selbe Index, der im Paragraph \ref{sec:example:theexample:initphase:createbuffer} in den Zeilen 155 und 157 angegeben wurde.
+    \item Die Richtung der Variable: Diese wird durch das Schlüsselwort \texttt{in} angegeben. Es wäre ebenfalls möglich, weitere Variablen zu definieren, die die Richtung \texttt{out} haben - diese Variable könnten dann beispielsweise vom Fragment Shader gelesen werden. Dies ist in diesem Beispiel allerdings nicht nötig.
+\end{enumerate}
+
+Die eigentliche Logik des Shaders ist denkbar simpel: Es wird lediglich die Position des Vertex, die auf der CPU Seite definiert wurde, unverändert in die vordefinierte Variable \texttt{gl\_Position} geschrieben. Diese vordefinierte Variable bestimmt die Vertex-Position für den Rest der Rendering Pipeline.
+
+\includeglslcode{shader/example-shader.fs.glsl}{10}{22} 
+Der Fragment Shader ist ebenfalls enorm simpel. Er definiert eine Ausgabevariable mit dem Namen \texttt{color} (Zeile 10). Diese definiert, wie der Name es sagt, die Farbe des Fragments. Zudem wird in diesem Shader ein Uniform Buffer mit dem Namen \texttt{u\_color} definiert. In diesen Uniform Buffer wird auf CPU Seite die Farbe des Pixels geschrieben (siehe Paragraph \ref{sec:example:theexample:initphase:uniform}).
+
+Die eigentliche Logik des Shaders ist erneut sehr simpel, es wird lediglich der Farbwert aus dem Uniform Buffer nach \texttt{color} kopiert.
+
+\paragraph{Uniform Buffer anlegen}
+\label{sec:example:theexample:initphase:uniform}
+Der letzte Schritt der Initialisierungsphase ist das Befüllen des Uniform Buffers. Dies geschieht durch den folgenden Code:
+\includeccode{src/main.c}{377}{387}
+
+Ein wichtiger Unterschied von Uniform Buffern zu Vertex und Index Buffern ist, dass sie immer im Zusammenhang mit einem \textit{program} stehen - sie werden schließlich in den Shadern definiert und jeder Shader hat womöglich andere Uniform Buffer. Aus diesem Grund benötigt man immer ein \textit{program} um ein Uniform Buffer mit Daten zu befüllen.
+
+Es geschehen hier zwei Dinge:
+\begin{enumerate}
+    \item Zeile 379 bis 381: Anhand des Namens erhält man eine Art Pointer des Uniform Buffer im program. Mit diesem Pointer können die Daten geschrieben werden.
+    \item Zeile 383 bis 386: Die Daten des Uniforms werden gesetzt.
+\end{enumerate}
+
+\subsubsection{Hauptphase}
+Nachdem die Initialisierungsphase durchlaufen wurde, ist der Hauptteil der Arbeit getan. Die Hauptphase benötigt vergleichsweise wenig Code:
+\includeccode{src/main.c}{460}{467}
+
+Ein einzige wichtige Funktion hier ist \texttt{glDrawElements()}. Diese Funktion veranlasst OpenGL mithilfe des derzeit gebindeten Index Buffers und des gebindeten \textit{programs} zu zeichnen. Zudem ist der erste Parameter wichtig, denn hier wird angegeben, welche Art von Primitive gezeichnet werden soll (bei diesem Beispiel sind es Dreiecke). Außerdem gibt der zweiter Parameter an, wie viele Indices von dem Index Buffer gezeichnet werden sollen. In diesem Beispiel sollen alle Indices gezeichnet werden, weshalb schlicht die Größe des Index Buffers angegeben wird.
+
+Die Funktion \texttt{sai\_update\_window()} ist lediglich eine util-Funktion.
+
+\subsubsection{Terminierungsphase}
+Noch kürzer als die Hauptphase ist lediglich die Terminierungsphase. Sie besteht in diesem Beispiel aus einer einzigen util-Funktion. Aus diesem Grund ist ihr Code auch nicht Teil dieses Berichtes.

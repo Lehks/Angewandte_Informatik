@@ -1,0 +1,28 @@
+\section{OpenGL zu Direct3D Wörterbuch}
+Die Tabelle \ref{tab:dictionary} stellt eine Art Wörterbuch bereit, mit dessen Hilfe das OpenGL Vokabular zu Direct3D Vokabular und umgekehrt übersetzt werden kann. Begriffe, die in diesem Wörterbuch nicht vorkommen, sind bei beiden APIs identisch.
+
+\begin{table}[tb]
+	\centering
+    \caption{Das Wörterbuch.}
+    \label{tab:dictionary}
+    \begin{tabular}{ll}
+        \toprule
+        \emph{OpenGL}                   & \emph{Direct3D}                                 \\ 
+        \midrule                          
+        Rendering Pipeline              & Graphics Pipeline                               \\
+        Vertex Specification Stage      & Input-Assember Stage                            \\
+        Vertex Shader Stage             & Vertex Shader Stage                             \\
+        Tesselation Control Shader      & Hull Shader Stage                               \\
+        Tesselation Primitve Generation & Tesselator Stage                                \\
+        Tesselation Evaluation Shader   & Domain Shader Stage                             \\
+        Geometry Shader Shader          & Geometry Shader Stage                           \\
+        Vertex Post-Processing Stage    & \textless Teil der Rasterizer Stage\textgreater \\
+        Rasterisation Stage             & Rasterizer Stage                                \\ 
+        Fragment Shader Stage           & Pixel-Shader Stage                              \\ 
+        Per-Sample Operation Stage      & Output-Merger Stage                             \\ 
+        Vertex Buffer                   & Vertex Buffer                                   \\ 
+        Index Buffer                    & Index Buffer                                    \\ 
+        Uniform Buffer                  & Constant Buffer                                 \\ 
+        \bottomrule
+	\end{tabular}
+\end{table}

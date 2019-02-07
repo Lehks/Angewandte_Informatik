@@ -4,10 +4,12 @@
 \usepackage[german]{babel}
 \usepackage{hyperref}
 \usepackage{listings}
-\usepackage{apacite}
+\usepackage[nocompress]{cite}
 \usepackage{verbatim}
 \usepackage{tcolorbox}
+\usepackage{booktabs}
 \usepackage{tikz}
+\usepackage{courier}
 
 % Source of command (last viewed 22.01.2019): https://tex.stackexchange.com/a/294990
 \newcommand{\linksymbol}
@@ -43,22 +45,6 @@
 {
     \begin{tcolorbox}[title=GLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1\linksymbol},top=0pt,bottom=0pt]
         \lstinputlisting[style=glsl_style, firstline=#2, firstnumber=#2, lastline=#3]{code/#1}
-    \end{tcolorbox}
-}
-
-\newcommand{\includehlslcode}[3]
-{
-    \begin{tcolorbox}[title=HLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1\linksymbol},top=0pt,bottom=0pt]
-        \lstinputlisting[style=hlsl_style, firstline=#2, firstnumber=#2, lastline=#3]{code/#1}
-    \end{tcolorbox}
-}
-
-\newcommand{\includeglslhlslcode}[6]
-{
-    \begin{tcolorbox}[title=GLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#1\#L#2}{#1\linksymbol},top=0pt,bottom=0pt]
-        \lstinputlisting[style=glsl_style, firstline=#2, firstnumber=#2, lastline=#3]{code/#1}
-        \tcbsubtitle{HLSL \hfill \href{https://github.com/Lehks/Angewandte_Informatik_Code/blob/master/#4\#L#5}{#4\linksymbol}}
-        \lstinputlisting[style=hlsl_style, firstline=#5, firstnumber=#5, lastline=#6]{code/#4}
     \end{tcolorbox}
 }
 
@@ -107,7 +93,7 @@
     %captionpos=b,
     %framexleftmargin=1.5em,
     xleftmargin=1em,
-    basicstyle=\footnotesize
+    basicstyle=\ttfamily\footnotesize
 }
 
 \lstdefinestyle{c_style}
@@ -129,7 +115,14 @@
 }
 
 \title{Eine Einführung in 3D Grafik APIs}
-\author{Lukas Reichmann}
+\author{
+    \IEEEauthorblockN{Lukas Reichmann}
+    \IEEEauthorblockA{
+                        htw saar -- Hochschule für Technik und Wirtschaft des Saarlandes\\ 
+                        Seminar ``Angewandte Informatik``\\ 
+                        Wintersemester 2018/19
+                     }
+}
 \date{\today}
 
 \begin{document}
@@ -137,16 +130,16 @@
 \maketitle
 
 \begin{abstract}
-    Dieser Artikel soll eine Grundlegende Einführung in die 3D Grafik Berechnung mit Hilfe von Diversen Low-Level Grafik APIs geben. Zudem sollen die behandelten Themen durch Codebeispiele weiter erläutert werden.
+    Dieser Artikel soll eine grundlegende Einführung in die 3D Grafik Berechnung mit Hilfe von diversen low-level Grafik APIs geben.
 \end{abstract}
 
-\input{chapters/introduction}
 \input{chapters/graphics_api_explanation}
 \input{chapters/shader_pipeline}
 \input{chapters/buffer}
-\input{chapters/uniforms}
+\input{chapters/example}
+\input{chapters/dictionary}
 
-\bibliographystyle{apacite}
+\bibliographystyle{IEEEtran}
 \bibliography{References}
 
 \end{document}

@@ -1,3 +1,4 @@
 [submodule "tex/code"]
 	path = tex/code
-	url = https://github.com/Lehks/Angwandte_Informatik_Code
+	url = https://github.com/Lehks/Angewandte_Informatik_Code
+	branch = master
